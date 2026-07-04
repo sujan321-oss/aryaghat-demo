@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO Optimization Meta Tags -->
+    <meta name="description" content="Discover our premium products, insightful blogs, and engaging podcasts. Your one-stop shop for everything you need.">
+    <meta name="keywords" content="ecommerce, products, blog, podcast, 3d animation, premium">
+    <meta name="author" content="Your Brand Name">
+    <title>Immersive Commerce - Shop, Read, Listen</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js for 3D Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for smooth animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- ScrollTrigger for scroll-based animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a1a2e',
+                        secondary: '#16213e',
+                        accent: '#e94560',
+                        light: '#eaeaea'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+            color: #eaeaea;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none; /* Let clicks pass through */
+        }
+
+        .glass-panel {
+            background: rgba(22, 33, 62, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link {
+            position: relative;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #e94560;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #b22d43);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+        }
+
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e94560;
+            border-radius: 4px;
+        }
+
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            will-change: opacity, visibility;
+        }
+
+        .is-visible {
+            opacity: 1;
+            transform: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <a href="#" class="font-display font-bold text-2xl tracking-wider text-white flex items-center gap-2">
+                        <i data-lucide="hexagon" class="text-accent"></i>
+                        VORTEX
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#home" class="nav-link text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#shop" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Shop</a>
+                        <a href="#blog" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Blog</a>
+                        <a href="#podcast" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Podcast</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="text-gray-300 hover:text-white transition">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </button>
+                    <button class="text-gray-300 hover:text-white transition relative">
+                        <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                        <span class="absolute -top-2 -right-2 bg-accent text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                    </button>
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden flex items-center ml-4">
+                        <button id="mobile-menu-btn" class="text-gray-300 hover:text-white focus:outline-none">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden glass-panel">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#shop" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Shop</a>
+                <a href="#blog" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Blog</a>
+                <a href="#podcast" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Podcast</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative h-screen flex items-center justify-center overflow-hidden">
+        <!-- 3D Canvas Container -->
+        <div id="canvas-container"></div>
+        
+        <!-- Overlay Content -->
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
+            <h1 class="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight drop-shadow-lg" id="hero-title">
+                Experience <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-500">The Future</span> of Commerce
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto opacity-0" id="hero-subtitle">
+                Discover our flagship product in stunning 3D. Explore our curated shop, read insightful articles, and listen to thought-provoking podcasts.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center opacity-0" id="hero-cta">
+                <a href="#shop" class="btn-primary text-white font-semibold py-3 px-8 rounded-full flex items-center justify-center gap-2">
+                    Explore Shop
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+                <a href="#podcast" class="glass-panel text-white font-semibold py-3 px-8 rounded-full hover:bg-secondary transition flex items-center justify-center gap-2">
+                    Listen to Podcast
+                    <i data-lucide="headphones" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
+            <i data-lucide="chevron-down" class="text-gray-400 w-8 h-8"></i>
+        </div>
+    </section>
+
+    <!-- Shop Section -->
+    <section id="shop" class="py-24 bg-primary relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in-section">
+                <h2 class="text-sm font-bold tracking-widest text-accent uppercase mb-2">Our Collection</h2>
+                <h3 class="text-3xl md:text-5xl font-display font-bold">Featured Products</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Product Card 1 -->
+                <div class="glass-panel rounded-2xl overflow-hidden group hover:border-accent transition duration-300 fade-in-section">
+                    <div class="h-64 bg-secondary relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent z-10"></div>
+                        <!-- Placeholder for product image, using CSS shape for demo -->
+                        <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-accent to-purple-500 transform group-hover:scale-110 transition duration-500 shadow-[0_0_30px_rgba(233,69,96,0.5)]"></div>
+                        
+                        <div class="absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition duration-300">
+                            <button class="bg-white text-primary p-3 rounded-full hover:bg-accent hover:text-white transition shadow-lg">
+                                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-bold font-display">Quantum Earbuds</h4>
+                            <span class="text-accent font-semibold">$199</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4">High-fidelity audio with active noise cancellation and spatial awareness.</p>
+                        <div class="flex items-center gap-1 text-yellow-400 text-sm">
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star-half" class="w-4 h-4 fill-current"></i>
+                            <span class="text-gray-500 ml-2">(128)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div class="glass-panel rounded-2xl overflow-hidden group hover:border-accent transition duration-300 fade-in-section" style="transition-delay: 100ms;">
+                    <div class="h-64 bg-secondary relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent z-10"></div>
+                        <!-- Placeholder for product image -->
+                        <div class="w-24 h-40 rounded-lg bg-gradient-to-tr from-blue-500 to-teal-400 transform group-hover:scale-110 transition duration-500 shadow-[0_0_30px_rgba(59,130,246,0.5)]"></div>
+                        
+                        <div class="absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition duration-300">
+                            <button class="bg-white text-primary p-3 rounded-full hover:bg-accent hover:text-white transition shadow-lg">
+                                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-bold font-display">Aura Smartwatch</h4>
+                            <span class="text-accent font-semibold">$249</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4">Track your health metrics with precision on a stunning edge-to-edge display.</p>
+                        <div class="flex items-center gap-1 text-yellow-400 text-sm">
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <span class="text-gray-500 ml-2">(84)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 3 -->
+                <div class="glass-panel rounded-2xl overflow-hidden group hover:border-accent transition duration-300 fade-in-section" style="transition-delay: 200ms;">
+                    <div class="h-64 bg-secondary relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent z-10"></div>
+                        <!-- Placeholder for product image -->
+                        <div class="w-40 h-24 rounded-xl bg-gradient-to-tr from-purple-500 to-pink-500 transform group-hover:scale-110 transition duration-500 shadow-[0_0_30px_rgba(168,85,247,0.5)]"></div>
+                        
+                        <div class="absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition duration-300">
+                            <button class="bg-white text-primary p-3 rounded-full hover:bg-accent hover:text-white transition shadow-lg">
+                                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-bold font-display">Nexus Controller</h4>
+                            <span class="text-accent font-semibold">$89</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mb-4">Ergonomic design with customizable haptic feedback for ultimate gaming.</p>
+                        <div class="flex items-center gap-1 text-yellow-400 text-sm">
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            <i data-lucide="star" class="w-4 h-4 text-gray-600"></i>
+                            <span class="text-gray-500 ml-2">(42)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center fade-in-section">
+                <button class="border border-accent text-accent hover:bg-accent hover:text-white transition py-2 px-6 rounded-full font-medium">
+                    View All Products
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog" class="py-24 bg-secondary relative">
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 fade-in-section">
+                <div>
+                    <h2 class="text-sm font-bold tracking-widest text-accent uppercase mb-2">Insights</h2>
+                    <h3 class="text-3xl md:text-5xl font-display font-bold">Latest Articles</h3>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <button class="text-gray-300 hover:text-accent transition flex items-center gap-2 text-sm font-medium">
+                        Read all articles <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Featured Blog Post -->
+                <div class="glass-panel rounded-2xl overflow-hidden group cursor-pointer fade-in-section">
+                    <div class="h-72 bg-primary relative overflow-hidden">
+                        <!-- Abstract geometric pattern for blog image -->
+                        <div class="absolute inset-0 opacity-30 group-hover:scale-105 transition duration-700 ease-in-out" style="background-image: radial-gradient(circle at 20% 50%, rgba(233, 69, 96, 0.4) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.4) 0%, transparent 50%);"></div>
+                        
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">Technology</span>
+                        </div>
+                    </div>
+                    <div class="p-8">
+                        <div class="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                            <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> Oct 24, 2023</span>
+                            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> 5 min read</span>
+                        </div>
+                        <h4 class="text-2xl font-bold font-display mb-3 group-hover:text-accent transition">The Evolution of 3D Commerce and How It's Changing Shopping</h4>
+                        <p class="text-gray-400 mb-6 line-clamp-3">Discover how immersive technologies are transforming the online retail experience, allowing customers to interact with products in ways previously impossible outside a physical store.</p>
+                        
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center font-bold text-sm">
+                                AS
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-white">Alex Sterling</p>
+                                <p class="text-xs text-gray-500">Tech Editor</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Blog Posts List -->
+                <div class="flex flex-col gap-6">
+                    <!-- Article 1 -->
+                    <div class="glass-panel rounded-xl p-6 flex gap-6 group cursor-pointer fade-in-section" style="transition-delay: 100ms;">
+                        <div class="w-24 h-24 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 flex-shrink-0 relative overflow-hidden">
+                             <div class="absolute inset-0 bg-blue-500/20 group-hover:bg-blue-500/40 transition"></div>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <span class="text-accent text-xs font-bold mb-1 uppercase tracking-wider">Design</span>
+                            <h4 class="text-lg font-bold font-display mb-2 group-hover:text-accent transition line-clamp-2">Minimalism in Modern Electronics Design</h4>
+                            <p class="text-sm text-gray-400 line-clamp-1">Why less is more when it comes to the devices we use every day.</p>
+                        </div>
+                    </div>
+
+                    <!-- Article 2 -->
+                    <div class="glass-panel rounded-xl p-6 flex gap-6 group cursor-pointer fade-in-section" style="transition-delay: 200ms;">
+                        <div class="w-24 h-24 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 flex-shrink-0 relative overflow-hidden">
+                             <div class="absolute inset-0 bg-purple-500/20 group-hover:bg-purple-500/40 transition"></div>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <span class="text-accent text-xs font-bold mb-1 uppercase tracking-wider">Lifestyle</span>
+                            <h4 class="text-lg font-bold font-display mb-2 group-hover:text-accent transition line-clamp-2">Optimizing Your Workspace for Productivity</h4>
+                            <p class="text-sm text-gray-400 line-clamp-1">Simple changes to your environment that yield massive results.</p>
+                        </div>
+                    </div>
+
+                    <!-- Upload Blog CTA -->
+                    <div class="border border-dashed border-gray-600 rounded-xl p-6 flex items-center justify-center text-center hover:bg-gray-800/50 transition cursor-pointer fade-in-section" style="transition-delay: 300ms;" onclick="document.getElementById('upload-blog-modal').classList.remove('hidden')">
+                        <div>
+                            <div class="bg-gray-800 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
+                                <i data-lucide="plus" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="text-md font-medium text-white mb-1">Contribute to our Blog</h4>
+                            <p class="text-xs text-gray-400">Share your thoughts with our community</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Podcast Section -->
+    <section id="podcast" class="py-24 bg-primary relative overflow-hidden">
+        <!-- Background decoration -->
+        <div class="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="bg-secondary/50 border border-gray-700 rounded-3xl p-8 md:p-12 backdrop-blur-sm fade-in-section">
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    
+                    <!-- Podcast Cover / Player Area -->
+                    <div class="w-full lg:w-1/2">
+                        <div class="relative w-full aspect-square max-w-md mx-auto rounded-2xl overflow-hidden shadow-2xl group">
+                            <!-- Cover Art Placeholder -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-primary">
+                                <div class="absolute inset-0 opacity-20" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+                            </div>
+                            
+                            <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                                <h3 class="font-display font-bold text-3xl mb-2">VORTEX<br><span class="text-accent">WAVES</span></h3>
+                                <p class="text-sm tracking-widest uppercase text-gray-300">The Official Podcast</p>
+                            </div>
+
+                            <!-- Play Button Overlay -->
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
+                                <button class="w-20 h-20 bg-accent rounded-full flex items-center justify-center pl-2 hover:scale-110 transition shadow-[0_0_20px_rgba(233,69,96,0.5)]">
+                                    <i data-lucide="play" class="w-8 h-8 text-white fill-current"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Audio Player Controls (Visual only) -->
+                        <div class="max-w-md mx-auto mt-6">
+                            <div class="flex justify-between text-xs text-gray-400 mb-2">
+                                <span>12:45</span>
+                                <span>45:30</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-1.5 mb-4 relative cursor-pointer">
+                                <div class="bg-accent h-1.5 rounded-full w-1/3"></div>
+                                <div class="absolute top-1/2 -translate-y-1/2 left-1/3 w-3 h-3 bg-white rounded-full shadow"></div>
+                            </div>
+                            <div class="flex justify-center items-center gap-6">
+                                <button class="text-gray-400 hover:text-white"><i data-lucide="skip-back" class="w-5 h-5"></i></button>
+                                <button class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-primary hover:scale-105 transition"><i data-lucide="play" class="w-5 h-5 fill-current"></i></button>
+                                <button class="text-gray-400 hover:text-white"><i data-lucide="skip-forward" class="w-5 h-5"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Podcast Info & Episodes -->
+                    <div class="w-full lg:w-1/2">
+                        <div class="mb-8">
+                            <span class="bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">New Episode</span>
+                            <h2 class="text-3xl md:text-4xl font-display font-bold mb-4">Ep 42: The Future of Wearables</h2>
+                            <p class="text-gray-300 mb-6">Join us as we discuss the next generation of wearable tech, how it integrates with daily life, and what to expect from the upcoming Vortex release.</p>
+                            
+                            <div class="flex gap-4">
+                                <button class="btn-primary text-white text-sm font-semibold py-2 px-6 rounded-full flex items-center gap-2">
+                                    <i data-lucide="headphones" class="w-4 h-4"></i> Listen Now
+                                </button>
+                                <button class="border border-gray-600 text-white hover:bg-gray-800 text-sm font-semibold py-2 px-6 rounded-full flex items-center gap-2 transition" onclick="document.getElementById('upload-podcast-modal').classList.remove('hidden')">
+                                    <i data-lucide="upload" class="w-4 h-4"></i> Upload Episode
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-lg mb-4 border-b border-gray-700 pb-2">Recent Episodes</h4>
+                            <div class="space-y-4">
+                                <!-- Ep Item -->
+                                <div class="flex items-center gap-4 group cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition">
+                                    <button class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 group-hover:bg-accent group-hover:text-white transition">
+                                        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <div class="flex-1">
+                                        <h5 class="font-medium text-sm text-gray-200 group-hover:text-white transition">Ep 41: Spatial Audio Explained</h5>
+                                        <p class="text-xs text-gray-500">Oct 15 • 38 min</p>
+                                    </div>
+                                    <button class="text-gray-500 hover:text-white"><i data-lucide="more-vertical" class="w-4 h-4"></i></button>
+                                </div>
+                                <!-- Ep Item -->
+                                <div class="flex items-center gap-4 group cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition">
+                                    <button class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 group-hover:bg-accent group-hover:text-white transition">
+                                        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                                    </button>
+                                    <div class="flex-1">
+                                        <h5 class="font-medium text-sm text-gray-200 group-hover:text-white transition">Ep 40: Interview with Lead Designer</h5>
+                                        <p class="text-xs text-gray-500">Oct 01 • 55 min</p>
+                                    </div>
+                                    <button class="text-gray-500 hover:text-white"><i data-lucide="more-vertical" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals (Hidden by default) -->
+    
+    <!-- Upload Blog Modal -->
+    <div id="upload-blog-modal" class="fixed inset-0 z-[60] bg-black/80 hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-secondary border border-gray-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center sticky top-0 bg-secondary z-10">
+                <h3 class="text-xl font-bold font-display">Create New Blog Post</h3>
+                <button class="text-gray-400 hover:text-white" onclick="document.getElementById('upload-blog-modal').classList.add('hidden')">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Title</label>
+                    <input type="text" class="w-full bg-primary border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-accent" placeholder="Enter post title">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Category</label>
+                    <select class="w-full bg-primary border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-accent">
+                        <option>Technology</option>
+                        <option>Design</option>
+                        <option>Lifestyle</option>
+                        <option>Announcements</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Cover Image</label>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:bg-gray-800/50 transition cursor-pointer">
+                        <i data-lucide="image" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-400">Drag & drop or click to upload</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Content</label>
+                    <textarea rows="6" class="w-full bg-primary border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-accent" placeholder="Write your content here..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-700 flex justify-end gap-3 sticky bottom-0 bg-secondary">
+                <button class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white" onclick="document.getElementById('upload-blog-modal').classList.add('hidden')">Cancel</button>
+                <button class="btn-primary px-6 py-2 text-sm font-medium text-white rounded-lg" onclick="alert('Blog post published successfully! (Mock Action)'); document.getElementById('upload-blog-modal').classList.add('hidden')">Publish Post</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Podcast Modal -->
+    <div id="upload-podcast-modal" class="fixed inset-0 z-[60] bg-black/80 hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-secondary border border-gray-700 rounded-2xl w-full max-w-lg">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-xl font-bold font-display">Upload Podcast Episode</h3>
+                <button class="text-gray-400 hover:text-white" onclick="document.getElementById('upload-podcast-modal').classList.add('hidden')">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Episode Title</label>
+                    <input type="text" class="w-full bg-primary border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-accent" placeholder="e.g. Ep 43: ...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Audio File (MP3/WAV)</label>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:bg-gray-800/50 transition cursor-pointer">
+                        <i data-lucide="music" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                        <p class="text-sm text-gray-400">Select audio file</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Description</label>
+                    <textarea rows="3" class="w-full bg-primary border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-accent" placeholder="Brief description of the episode..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-700 flex justify-end gap-3">
+                <button class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white" onclick="document.getElementById('upload-podcast-modal').classList.add('hidden')">Cancel</button>
+                <button class="btn-primary px-6 py-2 text-sm font-medium text-white rounded-lg" onclick="alert('Podcast episode uploaded successfully! (Mock Action)'); document.getElementById('upload-podcast-modal').classList.add('hidden')">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-primary pt-16 pb-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <a href="#" class="font-display font-bold text-xl tracking-wider text-white flex items-center gap-2 mb-4">
+                        <i data-lucide="hexagon" class="text-accent"></i>
+                        VORTEX
+                    </a>
+                    <p class="text-gray-400 text-sm mb-4">Creating immersive commerce experiences. Shop, read, and listen in one place.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Shop</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-accent transition">All Products</a></li>
+                        <li><a href="#" class="hover:text-accent transition">Wearables</a></li>
+                        <li><a href="#" class="hover:text-accent transition">Audio</a></li>
+                        <li><a href="#" class="hover:text-accent transition">Accessories</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Content</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#blog" class="hover:text-accent transition">Blog</a></li>
+                        <li><a href="#podcast" class="hover:text-accent transition">Podcast</a></li>
+                        <li><a href="#" class="hover:text-accent transition">Submit Article</a></li>
+                        <li><a href="#" class="hover:text-accent transition">RSS Feed</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Newsletter</h4>
+                    <p class="text-gray-400 text-sm mb-4">Subscribe for updates on new products and episodes.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your email" class="bg-secondary border border-gray-700 rounded-l-lg px-3 py-2 text-sm text-white w-full focus:outline-none focus:border-accent">
+                        <button class="bg-accent text-white px-3 py-2 rounded-r-lg hover:bg-opacity-90 transition">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                <p>&copy; 2026 Vortex Commerce. All rights reserved.</p>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-gray-300">Privacy Policy</a>
+                    <a href="#" class="hover:text-gray-300">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Mobile Menu Toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-primary/90', 'backdrop-blur-md', 'shadow-lg');
+            } else {
+                nav.classList.remove('bg-primary/90', 'backdrop-blur-md', 'shadow-lg');
+            }
+        });
+
+        // --- Intersection Observer for Scroll Animations ---
+        const setupScrollAnimations = () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Run once
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                observer.observe(section);
+            });
+        };
+
+        // --- Three.js 3D Animation Setup ---
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+
+            // Scene setup
+            const scene = new THREE.Scene();
+            
+            // Camera setup
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+            camera.position.x = 2; // Offset camera slightly to the right
+
+            // Renderer setup
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Create a complex geometric object (representing a high-tech product)
+            const geometry = new THREE.IcosahedronGeometry(2, 1);
+            
+            // Wireframe material for tech look
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x1a2b4c,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            
+            // Solid inner material
+            const innerMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0xe94560,
+                metalness: 0.7,
+                roughness: 0.2,
+                transparent: true,
+                opacity: 0.8,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1
+            });
+
+            const sphere = new THREE.Mesh(geometry, material);
+            const innerSphere = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 2), innerMaterial);
+            
+            const group = new THREE.Group();
+            group.add(sphere);
+            group.add(innerSphere);
+            scene.add(group);
+
+            // Move group slightly to the right to balance text on left
+            group.position.x = 1.5;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+
+            const pointLight2 = new THREE.PointLight(0xe94560, 2);
+            pointLight2.position.set(-5, -5, 5);
+            scene.add(pointLight2);
+
+            // Animation Loop
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX) * 0.001;
+                mouseY = (event.clientY - windowHalfY) * 0.001;
+            });
+
+            const animate = function () {
+                requestAnimationFrame(animate);
+
+                // Rotate object
+                group.rotation.x += 0.002;
+                group.rotation.y += 0.003;
+
+                // Inner sphere counter rotation
+                innerSphere.rotation.x -= 0.001;
+                innerSphere.rotation.y -= 0.002;
+
+                // Mouse interaction (gentle floating)
+                targetX = mouseX * 1;
+                targetY = mouseY * 1;
+                
+                group.rotation.y += 0.05 * (targetX - group.rotation.y);
+                group.rotation.x += 0.05 * (targetY - group.rotation.x);
+
+                renderer.render(scene, camera);
+            };
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                
+                // Adjust position based on screen size (responsive 3D)
+                if(window.innerWidth < 768) {
+                    group.position.x = 0; // Center on mobile
+                    camera.position.z = 6; // Move back
+                } else {
+                    group.position.x = 1.5; // Offset on desktop
+                    camera.position.z = 5;
+                }
+            });
+
+            // Initial responsive check
+            if(window.innerWidth < 768) {
+                group.position.x = 0;
+                camera.position.z = 6;
+            }
+
+            animate();
+
+            // GSAP ScrollTrigger for 3D object
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Fade out 3D object on scroll
+            gsap.to(group.position, {
+                y: 5,
+                scrollTrigger: {
+                    trigger: "#home",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            });
+            gsap.to(group.scale, {
+                x: 0.5, y: 0.5, z: 0.5,
+                scrollTrigger: {
+                    trigger: "#home",
+                    start: "top top",
+                    end: "bottom top",
+                    scrub: 1
+                }
+            });
+        };
+
+        // --- GSAP Initial Animations ---
+        const runInitialAnimations = () => {
+            const tl = gsap.timeline();
+
+            tl.from("#hero-title", {
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: "power3.out",
+                delay: 0.5
+            })
+            .to("#hero-subtitle", {
+                opacity: 1,
+                y: -10,
+                duration: 0.8,
+                ease: "power2.out"
+            }, "-=0.5")
+            .to("#hero-cta", {
+                opacity: 1,
+                y: -10,
+                duration: 0.8,
+                ease: "power2.out"
+            }, "-=0.6");
+        };
+
+        // Run everything on load
+        window.onload = () => {
+            initThreeJS();
+            runInitialAnimations();
+            setupScrollAnimations();
+        };
+
+    </script>
+</body>
+</html>
