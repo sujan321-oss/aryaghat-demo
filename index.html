@@ -144,6 +144,7 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
                         <a href="#home" class="nav-link text-white hover:text-accent px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#vortex" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Vortex</a>
                         <a href="#shop" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Shop</a>
                         <a href="#blog" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Blog</a>
                         <a href="#podcast" class="nav-link text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Podcast</a>
@@ -171,6 +172,7 @@
         <div id="mobile-menu" class="md:hidden hidden glass-panel">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#home" class="text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#vortex" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Vortex</a>
                 <a href="#shop" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Shop</a>
                 <a href="#blog" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Blog</a>
                 <a href="#podcast" class="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Podcast</a>
@@ -206,6 +208,84 @@
         <!-- Scroll Indicator -->
         <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
             <i data-lucide="chevron-down" class="text-gray-400 w-8 h-8"></i>
+        </div>
+    </section>
+
+    <!-- Vortex Section -->
+    <section id="vortex" class="py-24 bg-secondary relative overflow-hidden">
+        <!-- Background decoration -->
+        <div class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16 fade-in-section">
+                <h2 class="text-sm font-bold tracking-widest text-accent uppercase mb-2">The Vortex Experience</h2>
+                <h3 class="text-3xl md:text-5xl font-display font-bold">Powered by Aryaghat</h3>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <!-- Vortex Visual -->
+                <div class="w-full lg:w-1/2 fade-in-section">
+                    <div class="relative w-full aspect-square max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl glass-panel flex items-center justify-center group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-primary opacity-70"></div>
+                        <div class="absolute w-64 h-64 rounded-full border border-accent/40 animate-[spin_18s_linear_infinite]"></div>
+                        <div class="absolute w-48 h-48 rounded-full border border-purple-500/40 animate-[spin_12s_linear_infinite_reverse]"></div>
+                        <div class="absolute w-32 h-32 rounded-full bg-gradient-to-tr from-accent to-purple-500 blur-md group-hover:scale-110 transition duration-500 shadow-[0_0_60px_rgba(233,69,96,0.5)]"></div>
+                        <div class="relative z-10 text-center">
+                            <i data-lucide="hexagon" class="text-accent w-12 h-12 mx-auto mb-3"></i>
+                            <h4 class="font-display font-bold text-4xl tracking-wider text-white">VORTEX</h4>
+                            <p class="text-sm tracking-[0.3em] uppercase text-gray-300 mt-1">by Aryaghat</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vortex Content -->
+                <div class="w-full lg:w-1/2">
+                    <div class="mb-8 fade-in-section">
+                        <span class="bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">Aryaghat Labs</span>
+                        <h2 class="text-3xl md:text-4xl font-display font-bold mb-4">Where Commerce Meets the Vortex</h2>
+                        <p class="text-gray-300 mb-6">Vortex is Aryaghat's flagship immersive commerce platform. We blend stunning 3D visuals, curated content, and a seamless shopping journey into a single, unforgettable experience &mdash; crafted with care by the team at Aryaghat.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="glass-panel rounded-xl p-6 hover:border-accent transition duration-300 fade-in-section">
+                            <div class="bg-accent/20 w-12 h-12 rounded-full flex items-center justify-center text-accent mb-4">
+                                <i data-lucide="box" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="text-lg font-bold font-display mb-1">Immersive 3D</h4>
+                            <p class="text-sm text-gray-400">Explore every Aryaghat product in interactive, real-time 3D.</p>
+                        </div>
+                        <div class="glass-panel rounded-xl p-6 hover:border-accent transition duration-300 fade-in-section" style="transition-delay: 100ms;">
+                            <div class="bg-accent/20 w-12 h-12 rounded-full flex items-center justify-center text-accent mb-4">
+                                <i data-lucide="zap" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="text-lg font-bold font-display mb-1">Lightning Fast</h4>
+                            <p class="text-sm text-gray-400">A blazing-fast storefront engineered by Aryaghat.</p>
+                        </div>
+                        <div class="glass-panel rounded-xl p-6 hover:border-accent transition duration-300 fade-in-section" style="transition-delay: 200ms;">
+                            <div class="bg-accent/20 w-12 h-12 rounded-full flex items-center justify-center text-accent mb-4">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="text-lg font-bold font-display mb-1">Secure Checkout</h4>
+                            <p class="text-sm text-gray-400">Enterprise-grade security on every Aryaghat transaction.</p>
+                        </div>
+                        <div class="glass-panel rounded-xl p-6 hover:border-accent transition duration-300 fade-in-section" style="transition-delay: 300ms;">
+                            <div class="bg-accent/20 w-12 h-12 rounded-full flex items-center justify-center text-accent mb-4">
+                                <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="text-lg font-bold font-display mb-1">Community First</h4>
+                            <p class="text-sm text-gray-400">Blogs and podcasts powered by the Aryaghat community.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 fade-in-section">
+                        <a href="#shop" class="btn-primary text-white font-semibold py-3 px-8 rounded-full inline-flex items-center justify-center gap-2">
+                            Discover Vortex
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
